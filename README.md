@@ -1,3 +1,3 @@
-## ShellScript
+# ShellScript
 
-# My repository for Shell Scripts.
+## My repository for Shell Scripts.
