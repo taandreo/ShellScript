@@ -19,12 +19,12 @@ VERBOSE=0
 MAX_DEPTH=1
 RECURSIVE=0
 
-HELP="Usage: $NAME [OPTIONS] -i .ext -o .ext2
+HELP="Usage: $NAME [OPTIONS] -i .ext -o .ext2 DIRECTORY
 
 OPTIONS:
 
-    -i              Original extension
-    -o              Final extension
+    -i              Original extension.
+    -o              Final extension.
 
     -h, --help      Print this help summary page.
     -V, --version   Print the version.
@@ -33,13 +33,15 @@ OPTIONS:
     -maxdepth       Define de max depth.
     -r              Enable recursive mode.
 
-    EXAMPLES:
+EXAMPLES:
     
-    $NAME -i .zip -o .cbz       Change the extension .zip to .cbz for all files in this directory.
-    $NAME -i .zip -o .cbz -v    Change the extension .zip to .cbz for all files in this directory and show each altered file.
+    $NAME -i .txt -o .csv .                Change the extension .txt to .csv for all files in this directory.
+    $NAME -i .txt -o .csv . -v             Change the extension .txt to .csv all files in this directory and show each altered file.
+    $NAME -i .txt -o .csv /home/user -r    Change the extension .txt to .csv for all files starting in /home/user and each subdirectory. 
 "
 
 is_ext(){
+    # Create a regex which only matches 
     regex='^\.[[:alnum:]][.[:alnum:]]*'
     if !([[ "$1" =~ $regex ]])
     then
@@ -59,8 +61,13 @@ test_options(){
     then
         echo "-o option required."
     fi
+
+    if !(test -n "$3")
+    then
+        echo "Missing directory operand."
+    fi
     
-    if !(test -n "$1" & test -n "$2")
+    if !(test -n "$1" & test -n "$2" & test -n "$3")
     then
         exit 1
     fi
@@ -113,9 +120,11 @@ do
         ;;
             
 
-        *)
-            if test -n "$1"
+        *)  
+            if test -d "$1"
             then
+                DIRECTORY="$1"
+            else
                 echo "Invalid option: $1"
                 exit 1
             fi
@@ -125,13 +134,13 @@ do
 done
 
 
-test_options $INPUT_EXT $OUTPUT_EXT
+test_options $INPUT_EXT $OUTPUT_EXT $DIRECTORY
 
 if test $RECURSIVE = 1
 then
-    find . -regex "^.*\\$INPUT_EXT\$" > cache_find
+    find  $DIRECTORY -regex "^.*\\$INPUT_EXT\$" > cache_find
 else
-    find . -maxdepth $MAX_DEPTH -regex "^.*\\$INPUT_EXT\$" > cache_find
+    find  $DIRECTORY -maxdepth $MAX_DEPTH -regex "^.*\\$INPUT_EXT\$" > cache_find
 fi
 
 while read f
